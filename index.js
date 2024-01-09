@@ -30,6 +30,14 @@ async function run() {
 
     const coffeesCollection = client.db('coffeesDB').collection('coffees');
 
+    // Read a specific element
+    app.get('/coffees/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await coffeesCollection.findOne(query);
+      res.send(result);
+    })
+
     // 2. Read all the elements
     app.get('/coffees', async(req, res) => {
       const cursor = coffeesCollection.find();
@@ -40,8 +48,30 @@ async function run() {
     // 1. Create <---> post
     app.post('/coffees', async(req, res) =>{
       const newCoffee = req.body;
-      // console.log(newCoffee)
+      console.log(newCoffee)
       const result = await coffeesCollection.insertOne(newCoffee);
+      res.send(result);
+    })
+
+    // update <--> Put an element
+    app.put('/coffees/:id', async(req, res) => {
+      const id = req.params.id;
+      const coffee = req.body;
+      const filter = {_id: new ObjectId(id)};
+      const options = { upsert: true};
+      const updateCoffee = {
+        $set: {
+          name: coffee.name,
+          supplier: coffee.supplier,
+          quantity: coffee.quantity,
+          taste: coffee.taste, 
+          category: coffee.category, 
+          details: coffee.details, 
+          photo: coffee.photo,
+        }
+      }
+      
+      const result = await coffeesCollection.updateOne(filter, updateCoffee, options);
       res.send(result);
     })
 
